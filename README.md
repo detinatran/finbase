@@ -164,7 +164,7 @@ scripts/     dev.sh · deploy-base-sepolia.sh
 
 ## Credits
 
-3D icons and illustrations generated with Codex CLI image generation; logo hand-drawn as SVG. Demo narration: [Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (Apache-2.0), run locally.
+3D icons generated with Codex CLI image generation; logo hand-drawn as SVG. Pitch-deck photos from Unsplash (Unsplash License): John, Kaitlyn Baker, Jason Yuen (Shenzhen Bay). All other screenshots are of the real app and the Base Sepolia explorer. Demo narration: [Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (Apache-2.0), run locally.
 
 ## License
 

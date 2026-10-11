@@ -6,7 +6,7 @@ Target: 11 slides, ~55 s each. The live demo (slide 6) gets 3 minutes. If the de
 
 ### 1 · Title (20 s)
 **Leash — an AI wallet agent that can't go rogue**
-Topic F · Autonomous On-chain Wallet Agent · [Team name] · [Members, universities]
+Topic F · Autonomous On-chain Wallet Agent · Tran Anh Duong · Pham Sy Toan
 
 > "AI is becoming a financial participant. Today we'll show you an AI that holds a real wallet, and why it still can't lose your money, even when we hack it on stage."
 

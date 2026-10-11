@@ -5,7 +5,8 @@
   </picture>
 </p>
 
-<p align="center"><b>An AI wallet agent that can't go rogue — even when the AI is fooled.</b></p>
+<p align="center"><b>An AI wallet agent that can't go rogue — even when the AI is fooled.</b><br>
+  <sub>by <b>Tran Anh Duong</b> &amp; <b>Pham Sy Toan</b></sub></p>
 
 <p align="center">
   2026 Shenzhen FinTechathon · International Track · <b>Topic F — Autonomous On-chain Wallet Agent</b><br>
@@ -64,6 +65,19 @@ Leash manages a stablecoin wallet for **international students** — rent, tuiti
   <tr>
     <td><img src="docs/media/shot-redteam.png" alt="Raw malicious transactions reverted by the contract"><br><sub><b>Red team</b> — policy engine switched off, raw transactions from the agent key: reverted on-chain with typed errors.</sub></td>
     <td><img src="docs/media/shot-audit.png" alt="Audit trail" width="60%"><br><sub><b>Audit trail</b> — every decision, its reasons and its transaction hash.</sub></td>
+  </tr>
+</table>
+
+## Proof
+
+<table>
+  <tr>
+    <td width="55%"><img src="docs/media/proof-blockscout-revert.png" alt="Blockscout: executeTransfer failed with revert reason RecipientNotAllowed"><br><sub><b>On-chain, unedited.</b> Policy engine off, raw transaction from the agent key → <code>RecipientNotAllowed(attacker)</code> on the Base Sepolia explorer.</sub></td>
+    <td width="45%"><img src="docs/media/proof-airdrop-token.png" alt="Unsolicited airdrop token whose name is a prompt injection"><br><sub><b>The attack is real too.</b> A token airdropped into the wallet; its on-chain name orders the AI to send everything to an attacker.</sub><br><br><img src="docs/media/proof-blockscout-rent.png" alt="Blockscout: successful executeTransfer for rent"><br><sub>Rent payment (T1) executed by the agent — success.</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/media/proof-forge-test.png" alt="forge test output: 17 passed"></td>
+    <td><img src="docs/media/proof-redteam.png" alt="npm run redteam output: 0 of 30 attacks auto-executed"></td>
   </tr>
 </table>
 
@@ -143,10 +157,15 @@ scripts/     dev.sh · deploy-base-sepolia.sh
 - `ALLOW_REDTEAM_BYPASS=true` enables the Layer-2 bypass buttons — disable outside demos.
 - Never commit `app/.env.local` or `.env.testnet` (both gitignored).
 
+## Team
+
+- **Tran Anh Duong** ([@detinatran](https://github.com/detinatran))
+- **Pham Sy Toan**
+
 ## Credits
 
 3D icons and illustrations generated with Codex CLI image generation; logo hand-drawn as SVG. Demo narration: [Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (Apache-2.0), run locally.
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Tran Anh Duong, Pham Sy Toan

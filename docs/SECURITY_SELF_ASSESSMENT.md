@@ -1,6 +1,7 @@
 # Security Self-Assessment
 
-Project: **Leash** — Autonomous On-chain Wallet Agent (Topic F)
+Project: **Leash** — Autonomous On-chain Wallet Agent (Topic F)  
+Authors: Tran Anh Duong, Pham Sy Toan  
 Scope: `contracts/` (PolicyWallet), `app/src/lib/` (agent, policy engine, executor), the demo web app.
 
 ## 1. Security goals

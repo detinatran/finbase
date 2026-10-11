@@ -1,5 +1,6 @@
 # Leash — Technical Documentation
 
+**Authors:** Tran Anh Duong, Pham Sy Toan  
 **Track:** 2026 Shenzhen FinTechathon, International Track · Topic F — Autonomous On-chain Wallet Agent
 **One line:** an AI wallet agent that manages a student's stablecoin wallet on its own, and *cannot* lose the user's money even when the AI itself is fooled or fully compromised.
 

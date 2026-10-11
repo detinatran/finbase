@@ -2,6 +2,8 @@
   "name": "leash-app",
   "version": "0.1.0",
   "private": true,
+  "author": "Tran Anh Duong, Pham Sy Toan",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3100",

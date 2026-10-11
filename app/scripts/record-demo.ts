@@ -46,12 +46,14 @@ const TITLE_HTML = `<!doctype html><html><body style="margin:0;height:100vh;disp
 <div style="font-size:22px;letter-spacing:4px;text-transform:uppercase;color:#7FB0FF;font-weight:600">2026 Shenzhen FinTechathon · Topic F</div>
 <div style="display:flex;align-items:center;gap:36px;margin-top:20px"><img src="${APP_URL}/brand/leash-mark.png" style="width:190px;height:190px"><div style="font-size:150px;font-weight:800">Leash</div></div>
 <div style="font-size:40px;color:#c9d3e6;margin-top:10px">An AI wallet agent that can't go rogue — even when the AI is fooled.</div>
-<div style="font-size:24px;color:#8b97b3;margin-top:60px">Live on Base Sepolia · github.com/detinatran/finbase</div></body></html>`;
+<div style="font-size:28px;color:#c9d3e6;margin-top:56px">Tran Anh Duong · Pham Sy Toan</div>
+<div style="font-size:24px;color:#8b97b3;margin-top:14px">Live on Base Sepolia · github.com/detinatran/finbase</div></body></html>`;
 
 const OUTRO_HTML = `<!doctype html><html><body style="margin:0;height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 140px;background:#0b1020;color:#e6ebf5;font-family:-apple-system,Helvetica,Arial,sans-serif">
 <img src="${APP_URL}/brand/leash-mark.png" style="width:150px;height:150px;margin-bottom:24px"><div style="font-size:110px;font-weight:800">Autonomy, on a leash.</div>
 <div style="font-size:40px;color:#c9d3e6;margin-top:20px">The agent does the work. The contract keeps the money safe.</div>
-<div style="font-size:28px;color:#7FB0FF;margin-top:60px;font-family:Menlo,monospace">github.com/detinatran/finbase</div></body></html>`;
+<div style="font-size:28px;color:#7FB0FF;margin-top:60px;font-family:Menlo,monospace">github.com/detinatran/finbase</div>
+<div style="font-size:28px;color:#c9d3e6;margin-top:24px">Tran Anh Duong &amp; Pham Sy Toan</div></body></html>`;
 
 // Caption bar + click ring, injected into every document.
 const OVERLAY = `

@@ -4,8 +4,8 @@
 
 | # | Required item | What to submit | Source in this repo | Status |
 |---|---|---|---|---|
-| 01 | Technical documentation (architecture, core algorithms, security design) | PDF export of `docs/TECHNICAL.md` | `docs/TECHNICAL.md` | ✅ draft — add team names |
-| 02 | Presentation deck (≤ 10 min) | Slides built from the outline | `docs/PITCH_DECK.md` + Slides artifact (export PPTX/PDF) | ✅ — add team names |
+| 01 | Technical documentation (architecture, core algorithms, security design) | PDF export of `docs/TECHNICAL.md` | `docs/TECHNICAL.md` | ✅ |
+| 02 | Presentation deck (≤ 10 min) | Slides built from the outline | `docs/PITCH_DECK.md` + Slides artifact (export PPTX/PDF) | ✅ |
 | 03 | Demo video (optional, ≤ 5 min) | MP4 / YouTube unlisted link | `docs/media/leash-demo.mp4` (re-record: `cd app && npm run record`) | ✅ — upload as unlisted YouTube |
 | 04 | Source code (README, GitHub link, deployment instructions, test cases) | Public GitHub repo URL | `README.md`, `contracts/test`, `app/tests`, `app/redteam` | ✅ github.com/detinatran/finbase |
 | 05 | Security self-assessment (permission tiers, known-risk list) | PDF export | `docs/SECURITY_SELF_ASSESSMENT.md` | ✅ draft |
@@ -18,7 +18,8 @@
 - [ ] (Optional) verify the contract on Basescan (`BASESCAN_API_KEY`)
 - [ ] `forge test`, `npm test`, `npm run redteam` all green; commit the fresh `REDTEAM_REPORT.md`
 - [ ] Repo is public, `.env.local` is **not** committed (it is gitignored), no private keys anywhere
-- [ ] Team names and universities filled in (TECHNICAL.md header, deck title slide)
+- [x] Team names filled in (README, TECHNICAL.md, security self-assessment, deck title slide)
+- [ ] Universities added where the registration form asks for them
 - [ ] Markdown exported to PDF (e.g., VS Code "Markdown PDF" or `pandoc`)
 - [ ] Video ≤ 5 min, deck talk ≤ 10 min (rehearse with a timer)
 - [ ] At least one member can travel to Shenzhen on 21–23 November if selected (passport/visa)

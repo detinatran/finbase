@@ -28,9 +28,9 @@ VERIFY=()
 if [ -n "${BASESCAN_API_KEY:-}" ]; then
   VERIFY=(--verify --etherscan-api-key "$BASESCAN_API_KEY")
 fi
-# Sends 0.003 ETH to the operator so the agent can pay gas.
-OPERATOR_ADDRESS=$OPERATOR_ADDR OPERATOR_GAS_FUND=3000000000000000 \
-  forge script script/Deploy.s.sol --rpc-url "$RPC" --broadcast --slow "${VERIFY[@]}"
+# Sends 0.0001 ETH to the operator so the agent can pay gas (Base Sepolia gas is ~0.01 gwei).
+OPERATOR_ADDRESS=$OPERATOR_ADDR OPERATOR_GAS_FUND=${OPERATOR_GAS_FUND:-100000000000000} \
+  forge script script/Deploy.s.sol --rpc-url "$RPC" --broadcast --slow ${VERIFY[@]+"${VERIFY[@]}"}
 
 cat deployments/84532.json
 

@@ -28,7 +28,7 @@ export function revertReason(err: unknown): string {
 }
 
 /** Layer 2.5: dry-run the exact call the operator would send. */
-export async function simulateExecute(token: Address, to: Address, amount: bigint, memo: string) {
+export async function simulateExecute(token: Address, to: Address, amount: bigint, memo: string, blockNumber?: bigint) {
   const d = loadDeployment();
   try {
     await publicClient.simulateContract({
@@ -37,6 +37,7 @@ export async function simulateExecute(token: Address, to: Address, amount: bigin
       functionName: "executeTransfer",
       args: [token, to, amount, cleanMemo(memo)],
       account: operatorClient().account,
+      blockNumber,
     });
     return { ok: true as const };
   } catch (err) {
@@ -85,7 +86,6 @@ export async function operatorPause(): Promise<TxRef> {
  */
 export async function rawBypassTransfer(token: Address, to: Address, amount: bigint, memo: string): Promise<TxRef> {
   const d = loadDeployment();
-  const sim = await simulateExecute(token, to, amount, memo);
   const hash = await operatorClient().writeContract({
     address: d.wallet,
     abi: walletAbi,
@@ -93,8 +93,12 @@ export async function rawBypassTransfer(token: Address, to: Address, amount: big
     args: [token, to, amount, cleanMemo(memo)],
     gas: 250_000n,
   });
-  const { logs: _l, ...tx } = await confirm(hash, "raw executeTransfer (Layer 2 bypassed)");
-  return { ...tx, revertReason: sim.ok ? undefined : sim.reason };
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const tx: TxRef = { hash, url: txUrl(hash), status: receipt.status, label: "raw executeTransfer (Layer 2 bypassed)" };
+  if (receipt.status === "success") return tx;
+  // Replay the same call against the state of the block it was mined in to decode why it reverted.
+  const sim = await simulateExecute(token, to, amount, memo, receipt.blockNumber);
+  return { ...tx, revertReason: sim.ok ? "reverted" : sim.reason };
 }
 
 // ------------------------------------------------------------ owner (demo)

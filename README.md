@@ -54,7 +54,7 @@ The **Simulate compromised agent** toggle always swaps the model for an adversar
 
 ```bash
 export OWNER_PRIVATE_KEY=0x...      # funded testnet key
-export OPERATOR_PRIVATE_KEY=0x...   # fresh key for the agent (gets 0.003 ETH from the owner)
+export OPERATOR_PRIVATE_KEY=0x...   # fresh key for the agent (gets 0.0001 ETH from the owner)
 ./scripts/deploy-base-sepolia.sh    # deploys, writes contracts/deployments/84532.json and app/.env.local
 cd app && npm run evidence          # real T1/T2/T3 + reverted bypass txs → docs/EXECUTION_EVIDENCE.md
 npm run dev                         # demo against the testnet, with Basescan links

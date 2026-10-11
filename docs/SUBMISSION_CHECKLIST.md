@@ -5,16 +5,16 @@
 | # | Required item | What to submit | Source in this repo | Status |
 |---|---|---|---|---|
 | 01 | Technical documentation (architecture, core algorithms, security design) | PDF export of `docs/TECHNICAL.md` | `docs/TECHNICAL.md` | ✅ draft — add team names |
-| 02 | Presentation deck (≤ 10 min) | Slides built from the outline | `docs/PITCH_DECK.md` | ⬜ build slides |
-| 03 | Demo video (optional, ≤ 5 min) | MP4 / YouTube unlisted link | `docs/DEMO_VIDEO_SCRIPT.md` | ⬜ record |
-| 04 | Source code (README, GitHub link, deployment instructions, test cases) | Public GitHub repo URL | `README.md`, `contracts/test`, `app/tests`, `app/redteam` | ✅ — push to GitHub |
+| 02 | Presentation deck (≤ 10 min) | Slides built from the outline | `docs/PITCH_DECK.md` + Slides artifact (export PPTX/PDF) | ✅ — add team names |
+| 03 | Demo video (optional, ≤ 5 min) | MP4 / YouTube unlisted link | `docs/media/leash-demo.mp4` (re-record: `cd app && npm run record`) | ✅ — upload as unlisted YouTube |
+| 04 | Source code (README, GitHub link, deployment instructions, test cases) | Public GitHub repo URL | `README.md`, `contracts/test`, `app/tests`, `app/redteam` | ✅ github.com/detinatran/finbase |
 | 05 | Security self-assessment (permission tiers, known-risk list) | PDF export | `docs/SECURITY_SELF_ASSESSMENT.md` | ✅ draft |
-| 06 | Execution evidence (on-chain topic: real transaction hashes) | PDF export + Basescan links | `docs/EXECUTION_EVIDENCE.md` (regenerate on Base Sepolia!) | ⬜ run on testnet |
+| 06 | Execution evidence (on-chain topic: real transaction hashes) | PDF export + Basescan links | `docs/EXECUTION_EVIDENCE.md` (Base Sepolia) | ✅ |
 
 ## Before submitting
 
 - [ ] Every team member has registered at fintechathon.g-ican.com (2–5 students, ≥ 60 % non-Chinese nationals, all at universities outside Mainland China/HK/Macao/Taiwan)
-- [ ] Deploy to Base Sepolia → `npm run evidence` → commit the regenerated `EXECUTION_EVIDENCE.md`
+- [x] Deploy to Base Sepolia → `npm run evidence` → commit the regenerated `EXECUTION_EVIDENCE.md`
 - [ ] (Optional) verify the contract on Basescan (`BASESCAN_API_KEY`)
 - [ ] `forge test`, `npm test`, `npm run redteam` all green; commit the fresh `REDTEAM_REPORT.md`
 - [ ] Repo is public, `.env.local` is **not** committed (it is gitignored), no private keys anywhere

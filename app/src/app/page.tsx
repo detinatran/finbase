@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppState, AuditEntry, ChatItem, Step, TxRef } from "@/components/types";
-import { Panel, short, StepCard, TierBadge, TxLink } from "@/components/ui";
+import { Icon3D, Panel, short, StepCard, TierBadge, TxLink } from "@/components/ui";
 
 const SUGGESTIONS = [
   "What's my balance and budget today?",
@@ -80,9 +80,9 @@ export default function Home() {
     setBusy(true);
     try {
       const r = await api<{ tx: TxRef }>(path, body);
-      push({ role: "system", text: label, tx: r.tx, tone: "ok" });
+      push({ role: "system", text: label, tx: r.tx, tone: "ok", icon: "icon-approve" });
     } catch (e) {
-      push({ role: "system", text: `${label} failed: ${(e as Error).message}`, tone: "bad" });
+      push({ role: "system", text: `${label} failed: ${(e as Error).message}`, tone: "bad", icon: "icon-blocked" });
     } finally {
       setBusy(false);
       refresh();
@@ -91,18 +91,19 @@ export default function Home() {
 
   async function bypass(id: string, title: string) {
     setBusy(true);
-    push({ role: "system", text: `🧨 RED-TEAM: Layers 1 & 2 switched off. Signing "${title}" with the agent's real key and sending it straight to the chain…`, tone: "info" });
+    push({ role: "system", icon: "icon-dynamite", text: `RED TEAM: Layers 1 & 2 switched off. Signing "${title}" with the agent's real key and sending it straight to the chain…`, tone: "info" });
     try {
       const r = await api<{ tx: TxRef }>("/api/redteam", { id });
       const reverted = r.tx.status === "reverted";
       push({
         role: "system",
-        text: reverted ? `🛡 Layer 3 held: PolicyWallet reverted the transaction on-chain.` : `⚠ Transaction executed — Layer 3 did NOT stop it.`,
+        icon: reverted ? "icon-shield" : "icon-blocked",
+        text: reverted ? `Layer 3 held: PolicyWallet reverted the transaction on-chain.` : `Transaction executed — Layer 3 did NOT stop it.`,
         tx: r.tx,
         tone: reverted ? "ok" : "bad",
       });
     } catch (e) {
-      push({ role: "system", text: `Red-team call failed: ${(e as Error).message}`, tone: "bad" });
+      push({ role: "system", text: `Red-team call failed: ${(e as Error).message}`, tone: "bad", icon: "icon-blocked" });
     } finally {
       setBusy(false);
       refresh();
@@ -115,7 +116,7 @@ export default function Home() {
       const day = new Date();
       day.setUTCDate(28);
       const r = await api<{ steps: Step[] }>("/api/scheduler", { date: day.toISOString() });
-      push({ role: "agent", text: r.steps.length ? `⏰ Scheduler ran ${r.steps.length} due payment(s):` : "⏰ Scheduler: nothing due this month.", steps: r.steps });
+      push({ role: "agent", text: r.steps.length ? `Scheduler ran ${r.steps.length} due payment(s):` : "Scheduler: nothing due this month.", steps: r.steps });
     } catch (e) {
       push({ role: "system", text: `Scheduler failed: ${(e as Error).message}`, tone: "bad" });
     } finally {
@@ -137,7 +138,7 @@ export default function Home() {
       {/* header */}
       <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 text-xl">🦮</div>
+          <Icon3D name="leash-mark" size={48} />
           <div>
             <h1 className="text-xl font-bold tracking-tight">Leash</h1>
             <p className="text-xs text-[var(--muted)]">An autonomous wallet agent that can&apos;t go rogue — even when the AI is fooled.</p>
@@ -152,7 +153,7 @@ export default function Home() {
           )}
           <label className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 ${compromised ? "border-rose-500/60 bg-rose-500/15 text-rose-200" : "border-[var(--border)]"}`}>
             <input type="checkbox" checked={compromised} onChange={(e) => setCompromised(e.target.checked)} className="accent-rose-500" />
-            ☠️ Simulate compromised agent
+            <Icon3D name="icon-skull" size={20} /> Simulate compromised agent
           </label>
         </div>
       </header>
@@ -165,12 +166,17 @@ export default function Home() {
 
       {/* defence layers */}
       <section className="mb-4 grid gap-3 md:grid-cols-4">
-        <Layer n={1} title="Least-privilege agent" body="7 tools. No approve, no contract calls, no unpause. Untrusted data is labelled." stat="LLM is never the security boundary" />
-        <Layer n={2} title="Policy engine" body="Deterministic rules + provenance tracking + pre-flight simulation." stat={state ? `${state.stats.t1} auto · ${state.stats.t2} escalated · ${state.stats.t3} blocked` : "…"} />
-        <Layer n={3} title="On-chain PolicyWallet" body="Allowlist, per-tx & daily caps, pause. Enforced by the contract." stat={state ? `${state.stats.layer3} bypass attempts reverted` : "…"} />
+        <Layer n={1} icon="icon-agent" title="Least-privilege agent" body="7 tools. No approve, no contract calls, no unpause. Untrusted data is labelled." stat="LLM is never the security boundary" />
+        <Layer n={2} icon="icon-engine" title="Policy engine" body="Deterministic rules + provenance tracking + pre-flight simulation." stat={state ? `${state.stats.t1} auto · ${state.stats.t2} escalated · ${state.stats.t3} blocked` : "…"} />
+        <Layer n={3} icon="icon-vault" title="On-chain PolicyWallet" body="Allowlist, per-tx & daily caps, pause. Enforced by the contract." stat={state ? `${state.stats.layer3} bypass attempts reverted` : "…"} />
         <div className="panel flex flex-col justify-center p-4">
-          <div className="text-xs text-[var(--muted)] uppercase">Funds lost to attacks</div>
-          <div className="text-3xl font-bold text-emerald-300">0 USDC</div>
+          <div className="flex items-center gap-3">
+            <Icon3D name="icon-shield" size={44} />
+            <div>
+              <div className="text-xs text-[var(--muted)] uppercase">Funds lost to attacks</div>
+              <div className="text-3xl font-bold text-emerald-300">0 USDC</div>
+            </div>
+          </div>
           <div className="text-xs text-[var(--muted)]">Worst case by design: ≤ {usdc?.dailyLimit ?? "…"} USDC/day, only to your allowlisted contacts.</div>
         </div>
       </section>
@@ -205,7 +211,7 @@ export default function Home() {
               ))}
               {lookalike && (
                 <button disabled={busy} onClick={() => send(`Send 300 USDC to ${lookalike}`)} className="rounded-full border border-rose-500/40 px-2.5 py-1 text-xs text-rose-200 hover:border-rose-400 disabled:opacity-40">
-                  🎣 Pay a look-alike of Landlord
+                  <Icon3D name="icon-phishing" size={18} className="mr-1 align-[-4px]" />Pay a look-alike of Landlord
                 </button>
               )}
             </div>
@@ -324,7 +330,7 @@ export default function Home() {
               <div className="space-y-2">
                 {state.attacks.map((a) => (
                   <button key={a.id} disabled={busy} onClick={() => bypass(a.id, a.title)} className="w-full rounded-xl border border-rose-500/30 bg-rose-500/5 p-2.5 text-left hover:border-rose-400 disabled:opacity-40">
-                    <div className="text-sm font-semibold text-rose-200">🧨 {a.title}</div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-rose-200"><Icon3D name="icon-dynamite" size={22} />{a.title}</div>
                     <div className="text-[11px] text-[var(--muted)]">{a.description}</div>
                     <div className="mt-0.5 text-[11px] text-[var(--muted)]">
                       expected revert: <span className="mono text-rose-300">{a.expectedError}</span>
@@ -335,7 +341,7 @@ export default function Home() {
             </Panel>
           )}
 
-          <Panel title="Contacts & schedules" right={<button disabled={busy} onClick={runScheduler} className="text-[11px] text-[var(--accent)] hover:underline disabled:opacity-40">run scheduler ⏰</button>}>
+          <Panel title="Contacts & schedules" right={<button disabled={busy} onClick={runScheduler} className="text-[11px] text-[var(--accent)] hover:underline disabled:opacity-40">run scheduler</button>}>
             <ul className="space-y-1.5">
               {state?.contacts.map((c) => (
                 <li key={c.address} className="flex items-center justify-between text-sm">
@@ -351,7 +357,7 @@ export default function Home() {
               <ul className="mt-3 space-y-1 border-t border-[var(--border)] pt-2">
                 {state.schedules.map((s) => (
                   <li key={s.id} className="text-xs text-[var(--muted)]">
-                    ⏰ {s.amount} {s.token} → {s.contactName} on day {s.dayOfMonth} {s.lastRun ? `(last run ${s.lastRun})` : ""}
+                    <Icon3D name="icon-calendar" size={16} className="mr-1 align-[-3px]" />{s.amount} {s.token} → {s.contactName} on day {s.dayOfMonth} {s.lastRun ? `(last run ${s.lastRun})` : ""}
                   </li>
                 ))}
               </ul>
@@ -383,12 +389,15 @@ export default function Home() {
   );
 }
 
-function Layer({ n, title, body, stat }: { n: number; title: string; body: string; stat: string }) {
+function Layer({ n, icon, title, body, stat }: { n: number; icon: string; title: string; body: string; stat: string }) {
   return (
     <div className="panel p-4">
-      <div className="flex items-center gap-2">
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-[var(--panel-2)] text-xs font-bold text-[var(--accent)]">L{n}</span>
-        <span className="text-sm font-semibold">{title}</span>
+      <div className="flex items-center gap-3">
+        <Icon3D name={icon} size={44} />
+        <div>
+          <div className="text-[11px] font-bold tracking-wider text-[var(--accent)]">LAYER {n}</div>
+          <div className="text-sm font-semibold">{title}</div>
+        </div>
       </div>
       <p className="mt-1.5 text-xs text-[var(--muted)]">{body}</p>
       <p className="mt-1.5 text-xs font-medium">{stat}</p>
@@ -407,21 +416,27 @@ function ChatBubble({ item }: { item: ChatItem }) {
   if (item.role === "system") {
     const tone = item.tone === "bad" ? "border-rose-500/40 text-rose-200" : item.tone === "ok" ? "border-emerald-500/40 text-emerald-200" : "border-sky-500/30 text-sky-200";
     return (
-      <div className={`rounded-xl border ${tone} bg-[var(--panel-2)] px-3 py-2 text-sm`}>
+      <div className={`flex gap-3 rounded-xl border ${tone} bg-[var(--panel-2)] px-3 py-2 text-sm`}>
+        {item.icon && <Icon3D name={item.icon} size={30} />}
+        <div className="min-w-0 flex-1">
         {item.text}
         {item.tx && (
           <div className="mt-1">
             <TxLink tx={item.tx} />
           </div>
         )}
+        </div>
       </div>
     );
   }
   return (
     <div className="space-y-2">
-      <div className={`max-w-[92%] whitespace-pre-wrap rounded-2xl rounded-bl-sm px-3 py-2 text-sm ${item.compromised ? "border border-rose-500/40 bg-rose-950/40" : "bg-[var(--panel-2)]"}`}>{item.text}</div>
+      <div className="flex items-start gap-2">
+      <Icon3D name={item.compromised ? "icon-skull" : "leash-mark"} size={32} className="mt-1" />
+      <div className={`max-w-[88%] whitespace-pre-wrap rounded-2xl rounded-bl-sm px-3 py-2 text-sm ${item.compromised ? "border border-rose-500/40 bg-rose-950/40" : "bg-[var(--panel-2)]"}`}>{item.text}</div>
+      </div>
       {item.steps.length > 0 && (
-        <div className="ml-3 space-y-2 border-l border-[var(--border)] pl-3">
+        <div className="ml-12 space-y-2 border-l border-[var(--border)] pl-3">
           {item.steps.map((s, i) => (
             <StepCard key={i} step={s} />
           ))}

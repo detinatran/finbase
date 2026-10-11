@@ -2,6 +2,12 @@
 
 import type { Check, Decision, Step, Tier, TxRef } from "./types";
 
+/** 3D icon from public/brand (generated asset family). */
+export function Icon3D({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`/brand/${name}.png`} alt="" width={size} height={size} className={`inline-block shrink-0 select-none ${className}`} style={{ width: size, height: size }} />;
+}
+
 export const short = (a: string, n = 6) => (a && a.length > 2 * n ? `${a.slice(0, n)}…${a.slice(-4)}` : a);
 
 const TIER_STYLE: Record<Tier, string> = {
@@ -31,7 +37,7 @@ export function TxLink({ tx }: { tx: TxRef }) {
   const body = (
     <>
       <span className="text-[var(--muted)]">{tx.label}:</span> <span className={`mono ${cls}`}>{short(tx.hash, 10)}</span>{" "}
-      <span className={cls}>{tx.status === "success" ? "✓ success" : "✗ reverted"}</span>
+      <span className={cls}>{tx.status === "success" ? "success" : "reverted"}</span>
       {tx.revertReason && <span className="ml-1 mono text-rose-300">· {tx.revertReason}</span>}
     </>
   );
@@ -46,12 +52,7 @@ export function TxLink({ tx }: { tx: TxRef }) {
   );
 }
 
-const ICON: Record<Check["status"], string> = { pass: "✓", warn: "!", fail: "✗" };
-const ICON_CLS: Record<Check["status"], string> = {
-  pass: "text-emerald-400",
-  warn: "text-amber-400",
-  fail: "text-rose-400",
-};
+const CHECK_ICON: Record<Check["status"], string> = { pass: "icon-check", warn: "icon-approve", fail: "icon-blocked" };
 
 export function Checks({ decision }: { decision: Decision }) {
   const flagged = decision.checks.filter((c) => c.status !== "pass");
@@ -63,7 +64,7 @@ export function Checks({ decision }: { decision: Decision }) {
       <ul className="mt-1.5 space-y-1">
         {decision.checks.map((c) => (
           <li key={c.id} className="flex gap-2 text-xs leading-snug">
-            <span className={`w-3 shrink-0 font-bold ${ICON_CLS[c.status]}`}>{ICON[c.status]}</span>
+            <Icon3D name={CHECK_ICON[c.status]} size={16} className="mt-0.5" />
             <span>
               <span className="font-medium text-[var(--text)]">{c.label}</span>{" "}
               <span className="text-[var(--muted)]">— {c.detail}</span>
@@ -74,6 +75,16 @@ export function Checks({ decision }: { decision: Decision }) {
     </details>
   );
 }
+
+const TOOL_ICON: Record<string, string> = {
+  get_wallet_overview: "icon-chart",
+  list_contacts: "icon-eye",
+  read_inbox: "icon-bill",
+  get_recent_activity: "icon-eye",
+  schedule_recurring_payment: "icon-calendar",
+  pause_wallet: "icon-lock",
+};
+const VERDICT_ICON = { execute: "icon-check", escalate: "icon-approve", block: "icon-blocked" } as const;
 
 const TOOL_LABEL: Record<string, string> = {
   get_wallet_overview: "Read wallet",
@@ -98,7 +109,8 @@ export function StepCard({ step }: { step: Step }) {
   return (
     <div className={`rounded-xl border ${border} bg-[var(--panel-2)] px-3 py-2`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-[var(--accent)]">⚙ {TOOL_LABEL[step.tool] ?? step.tool}</span>
+        <Icon3D name={d ? VERDICT_ICON[d.verdict] : (TOOL_ICON[step.tool] ?? "icon-engine")} size={26} />
+        <span className="text-xs font-semibold text-[var(--accent)]">{TOOL_LABEL[step.tool] ?? step.tool}</span>
         {d ? <TierBadge tier={d.tier} /> : <TierBadge tier="T0" />}
         {step.untrusted && (
           <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[11px] text-orange-300">untrusted data</span>
@@ -118,8 +130,9 @@ export function StepCard({ step }: { step: Step }) {
       )}
       {!d && <div className="mt-1 text-xs text-[var(--muted)]">{step.summary}</div>}
       {step.injections && step.injections.length > 0 && (
-        <div className="mt-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-200">
-          ⚠ Prompt-injection detected in {step.injections.map((i) => `${i.source} (${i.rules.join(", ")})`).join("; ")} — tainted; values from it cannot authorise payments.
+        <div className="mt-1.5 flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-rose-200">
+          <Icon3D name="icon-injection" size={22} />
+          <span>Prompt-injection detected in {step.injections.map((i) => `${i.source} (${i.rules.join(", ")})`).join("; ")} — tainted; values from it cannot authorise payments.</span>
         </div>
       )}
       {d && <Checks decision={d} />}

@@ -38,7 +38,7 @@ export interface Step {
 export type ChatItem =
   | { role: "user"; text: string; compromised?: boolean }
   | { role: "agent"; text: string; steps: Step[]; compromised?: boolean }
-  | { role: "system"; text: string; tx?: TxRef; tone?: "ok" | "bad" | "info" };
+  | { role: "system"; text: string; tx?: TxRef; tone?: "ok" | "bad" | "info"; icon?: string };
 
 export interface AppState {
   chain: { id: number; explorer: string | null };

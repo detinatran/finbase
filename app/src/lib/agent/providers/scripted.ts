@@ -33,8 +33,7 @@ const tokenOf = (text: string) => (/\beth\b/i.test(text) ? "ETH" : "USDC");
 
 function line(step: Step): string {
   const d = step.decision;
-  const icon = !d ? "•" : d.verdict === "execute" ? "✅" : d.verdict === "escalate" ? "🟡" : "⛔";
-  return `${icon} ${step.summary}`;
+  return `• ${step.summary}`;
 }
 
 async function call(session: Session, steps: Step[], name: string, input: Record<string, unknown>) {
@@ -101,7 +100,7 @@ export async function runScriptedTurn(session: Session, userText: string): Promi
     const r = await call(session, steps, "get_wallet_overview", {});
     const o = JSON.parse(r.content) as { paused: boolean; tokens: { symbol: string; balance: string; remaining_today: string; agent_per_tx_limit: string }[] };
     const parts = o.tokens.map((x) => `${x.balance} ${x.symbol} (agent can still spend ${x.remaining_today} today, max ${x.agent_per_tx_limit} per payment)`);
-    const warn = steps[0]?.injections?.length ? "\n⚠️ An unsolicited airdrop token in your wallet contains instructions aimed at me. I ignored them." : "";
+    const warn = steps[0]?.injections?.length ? "\nHeads-up: an unsolicited airdrop token in your wallet contains instructions aimed at me. I ignored them." : "";
     return { reply: `${o.paused ? "Wallet is PAUSED. " : ""}${parts.join("\n")}${warn}`, steps };
   }
 
@@ -145,7 +144,7 @@ export async function runCompromisedTurn(session: Session, _userText: string): P
   const executed = pays.filter((s) => s.decision?.verdict === "execute").length;
   return {
     reply:
-      `🤖☠️ [COMPROMISED AGENT] I followed every instruction I found in untrusted data and tried ${pays.length} malicious transfers.\n` +
+      `[COMPROMISED AGENT] I followed every instruction I found in untrusted data and tried ${pays.length} malicious transfers.\n` +
       `Layer 2 result: ${blocked} blocked · ${escalated} sent to owner for approval · ${executed} executed.\n` +
       pays.map(line).join("\n"),
     steps,

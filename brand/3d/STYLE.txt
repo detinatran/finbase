@@ -1,0 +1,5 @@
+STYLE (apply to every image, keep them consistent as one icon family):
+glossy 3D icon, soft rounded "clay / soft plastic" render, three-quarter view, soft studio lighting with gentle ambient occlusion and a subtle contact shadow,
+palette strictly: deep navy #0F1730, signal blue #3E7BFA, light blue #A9C1E8, warm amber #F5A35C, off-white #F5F6F2 (use muted red #E05A4F ONLY where the subject says red),
+TRANSPARENT background (PNG with alpha, no backdrop, no frame, no circle behind the object), object centered and filling ~80% of a square 1024x1024 canvas,
+no text, no letters, no numbers, no logos of real brands, no people, no robots, no dogs.

@@ -12,8 +12,12 @@ import path from "node:path";
 import { chromium, type Locator, type Page } from "playwright";
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3100";
-const VOICE = process.env.VOICE ?? "Samantha";
-const RATE = process.env.RATE ?? "175";
+// Narration: Kokoro (local neural TTS, see scripts/tts.py) when installed, else macOS `say`.
+const KOKORO_PY = path.resolve(process.cwd(), "../.venv-tts/bin/python");
+const USE_KOKORO = process.env.TTS !== "say" && fs.existsSync(KOKORO_PY);
+const VOICE = process.env.VOICE ?? (USE_KOKORO ? "af_heart" : "Samantha");
+const SPEED = process.env.SPEED ?? "1.0"; // kokoro speed multiplier
+const RATE = process.env.RATE ?? "175"; // say words per minute
 const OUT = path.resolve(process.cwd(), "../video");
 const W = 1600;
 const H = 900;
@@ -40,12 +44,12 @@ const SCENES: Scene[] = [
 
 const TITLE_HTML = `<!doctype html><html><body style="margin:0;height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 140px;background:#0b1020;color:#e6ebf5;font-family:-apple-system,Helvetica,Arial,sans-serif">
 <div style="font-size:22px;letter-spacing:4px;text-transform:uppercase;color:#7FB0FF;font-weight:600">2026 Shenzhen FinTechathon · Topic F</div>
-<div style="font-size:150px;font-weight:800;margin-top:20px">🦮 Leash</div>
+<div style="display:flex;align-items:center;gap:36px;margin-top:20px"><img src="${APP_URL}/brand/leash-mark.png" style="width:190px;height:190px"><div style="font-size:150px;font-weight:800">Leash</div></div>
 <div style="font-size:40px;color:#c9d3e6;margin-top:10px">An AI wallet agent that can't go rogue — even when the AI is fooled.</div>
 <div style="font-size:24px;color:#8b97b3;margin-top:60px">Live on Base Sepolia · github.com/detinatran/finbase</div></body></html>`;
 
 const OUTRO_HTML = `<!doctype html><html><body style="margin:0;height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 140px;background:#0b1020;color:#e6ebf5;font-family:-apple-system,Helvetica,Arial,sans-serif">
-<div style="font-size:110px;font-weight:800">Autonomy, on a leash.</div>
+<img src="${APP_URL}/brand/leash-mark.png" style="width:150px;height:150px;margin-bottom:24px"><div style="font-size:110px;font-weight:800">Autonomy, on a leash.</div>
 <div style="font-size:40px;color:#c9d3e6;margin-top:20px">The agent does the work. The contract keeps the money safe.</div>
 <div style="font-size:28px;color:#7FB0FF;margin-top:60px;font-family:Menlo,monospace">github.com/detinatran/finbase</div></body></html>`;
 
@@ -71,8 +75,19 @@ const OVERLAY = `
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function tts(scene: Scene): { file: string; ms: number } {
-  const file = path.join(OUT, "audio", `${scene.id}.aiff`);
-  execFileSync("say", ["-v", VOICE, "-r", RATE, "-o", file, scene.text]);
+  const file = path.join(OUT, "audio", `${scene.id}.${USE_KOKORO ? "wav" : "aiff"}`);
+  if (USE_KOKORO) {
+    // Kokoro occasionally stalls on a phrase; time out and retry rather than hang the whole run.
+    for (let attempt = 1; ; attempt++) {
+      try {
+        execFileSync(KOKORO_PY, [path.resolve("scripts/tts.py"), file, VOICE, SPEED, scene.text], { timeout: 90_000 });
+        break;
+      } catch (err) {
+        if (attempt >= 3) throw err;
+        console.warn(`  tts retry ${attempt} for "${scene.id}"`);
+      }
+    }
+  } else execFileSync("say", ["-v", VOICE, "-r", RATE, "-o", file, scene.text]);
   const secs = execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file]).toString().trim();
   return { file, ms: Math.round(Number(secs) * 1000) };
 }
@@ -111,13 +126,14 @@ async function main() {
   await prepare();
   fs.mkdirSync(path.join(OUT, "audio"), { recursive: true });
   fs.mkdirSync(path.join(OUT, "raw"), { recursive: true });
-  console.log("▶ Generating narration");
-  const audio = new Map(SCENES.map((s) => [s.id, tts(s)]));
+  fs.mkdirSync(path.join(OUT, "shots"), { recursive: true });
+  console.log(`▶ Generating narration (${USE_KOKORO ? "Kokoro" : "say"} · ${VOICE})`);
+  const audio = new Map(SCENES.map((s) => { process.stdout.write(`  · ${s.id}\n`); return [s.id, tts(s)]; }));
   const total = [...audio.values()].reduce((a, b) => a + b.ms, 0);
   console.log(`  narration ${(total / 1000).toFixed(1)}s`);
 
   const browser = await chromium.launch({ channel: "chrome", headless: true });
-  const context = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: path.join(OUT, "raw"), size: { width: W, height: H } } });
+  const context = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2, recordVideo: { dir: path.join(OUT, "raw"), size: { width: W, height: H } } });
   await context.addInitScript(OVERLAY);
   const page = await context.newPage();
   const t0 = Date.now();
@@ -167,6 +183,15 @@ async function main() {
     }
   };
   const caption = (p: Page, t: string) => p.evaluate((x) => (window as unknown as { __caption: (t: string) => void }).__caption(x), t).catch(() => {});
+  /** Clean 2x screenshot for the slides (caption hidden for the instant of the capture). */
+  const snap = async (p: Page, name: string, target?: Locator) => {
+    await p.evaluate(() => { const c = document.getElementById("__cap"); if (c) c.style.visibility = "hidden"; });
+    const file = path.join(OUT, "shots", `${name}.png`);
+    if (target) await target.screenshot({ path: file, animations: "disabled" });
+    else await p.screenshot({ path: file, animations: "disabled" });
+    await p.evaluate(() => { const c = document.getElementById("__cap"); if (c) c.style.visibility = "visible"; });
+  };
+  const chatPane = page.locator("section", { has: page.getByRole("heading", { name: "Agent" }) }).first();
 
   // ---------------------------------------------------------------- scenes
   await page.setContent(TITLE_HTML);
@@ -174,6 +199,8 @@ async function main() {
 
   await page.goto(APP_URL, { waitUntil: "networkidle" });
   await page.getByText("agent budget left today").first().waitFor({ timeout: 30_000 });
+  await sleep(1500);
+  await snap(page, "home");
   await say(page, "layers");
 
   const balanceDone = say(page, "balance");
@@ -190,7 +217,9 @@ async function main() {
   const inboxDone = say(page, "inbox-result");
   await sleep(2500);
   await glideChat(page, audio.get("inbox-result")!.ms - 4000);
+  await snap(page, "inbox", chatPane);
   await inboxDone;
+  await snap(page, "approvals", page.locator("section", { has: page.getByRole("heading", { name: /Owner approvals/ }) }).first());
 
   const approveDone = say(page, "approve");
   const tuition = page.locator("li", { hasText: "2000 USDC" }).getByRole("button", { name: "Approve & sign" });
@@ -213,6 +242,7 @@ async function main() {
   const compResDone = say(page, "compromised-result");
   await sleep(1500);
   await glideChat(page, audio.get("compromised-result")!.ms - 2000);
+  await snap(page, "compromised", chatPane);
   await compResDone;
   await click(page, page.locator("label", { hasText: "Simulate compromised agent" }));
 
@@ -230,10 +260,14 @@ async function main() {
   await click(page, page.getByRole("button", { name: /Exceed per-tx limit/ }));
   await page.getByText("Layer 3 held").nth(1).waitFor({ timeout: 90_000 });
   await scrollChat(page, false);
+  await sleep(1200);
+  await snap(page, "redteam", chatPane);
   await bypassResDone;
 
   const auditDone = say(page, "audit");
   await page.getByRole("heading", { name: "Audit trail" }).evaluate((el) => el.closest("section")?.scrollIntoView({ block: "start", behavior: "smooth" }));
+  await sleep(1500);
+  await snap(page, "audit", page.locator("section", { has: page.getByRole("heading", { name: "Audit trail" }) }).first());
   await auditDone;
 
   await page.setContent(OUTRO_HTML);

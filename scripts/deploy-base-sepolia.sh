@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy to Base Sepolia (testnet) for the submission's real transaction hashes.
 #
-# Needs in your shell (never commit these):
+# Needs (in your shell or in .env.testnet — never commit these):
 #   OWNER_PRIVATE_KEY     testnet key with Base Sepolia ETH (owner + deployer)
 #   OPERATOR_PRIVATE_KEY  a second fresh testnet key for the agent
 # Optional:
@@ -10,6 +10,10 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export PATH="$HOME/.foundry/bin:$PATH"
+# Keys come from the environment, or from the gitignored .env.testnet at the repo root.
+if [ -z "${OWNER_PRIVATE_KEY:-}" ] && [ -f "$ROOT/.env.testnet" ]; then
+  set -a; . "$ROOT/.env.testnet"; set +a
+fi
 RPC="${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org}"
 
 : "${OWNER_PRIVATE_KEY:?set OWNER_PRIVATE_KEY}"

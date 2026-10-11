@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b1020;
+  --panel: #121a2f;
+  --panel-2: #172140;
+  --border: #24304f;
+  --text: #e6ebf5;
+  --muted: #8b97b3;
+  --accent: #6ea8ff;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3658;
+  border-radius: 8px;
+}

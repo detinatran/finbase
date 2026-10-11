@@ -5,3 +5,4 @@ next-env.d.ts
 .env.local
 data/*.json
 data/*.jsonl
+data/*.bak

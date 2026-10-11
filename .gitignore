@@ -5,3 +5,4 @@ contracts/cache/
 contracts/broadcast/
 contracts/deployments/31337.json
 .env.testnet
+video/

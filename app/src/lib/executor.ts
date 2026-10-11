@@ -41,7 +41,8 @@ export async function simulateExecute(token: Address, to: Address, amount: bigin
     });
     return { ok: true as const };
   } catch (err) {
-    return { ok: false as const, reason: revertReason(err) };
+    const isRevert = err instanceof BaseError && err.walk((e) => e instanceof ContractFunctionRevertedError) instanceof ContractFunctionRevertedError;
+    return { ok: false as const, reason: revertReason(err), isRevert };
   }
 }
 
@@ -96,9 +97,14 @@ export async function rawBypassTransfer(token: Address, to: Address, amount: big
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   const tx: TxRef = { hash, url: txUrl(hash), status: receipt.status, label: "raw executeTransfer (Layer 2 bypassed)" };
   if (receipt.status === "success") return tx;
-  // Replay the same call against the state of the block it was mined in to decode why it reverted.
-  const sim = await simulateExecute(token, to, amount, memo, receipt.blockNumber);
-  return { ...tx, revertReason: sim.ok ? "reverted" : sim.reason };
+  // Replay the same call to decode why it reverted: first at the block it was mined in, then at
+  // latest (public RPCs behind a load balancer may not know a just-mined block yet).
+  for (const blockNumber of [receipt.blockNumber, undefined, undefined]) {
+    const sim = await simulateExecute(token, to, amount, memo, blockNumber);
+    if (!sim.ok && sim.isRevert) return { ...tx, revertReason: sim.reason };
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  return { ...tx, revertReason: "reverted" };
 }
 
 // ------------------------------------------------------------ owner (demo)
